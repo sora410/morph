@@ -4,8 +4,25 @@ from math import cos, sin, radians, sqrt
 from copy import copy, deepcopy
 from collections import deque
 
-W = 500; H = 500
+# W = 500; H = 500
 MAX = 800
+
+class LogicDB:
+    def __init__(self):
+        pass
+    
+    def register(self, ls):
+        'l1 -> l2 -> ... -> ln, where ls = [l1,l2,...,ln]'
+        l = len(ls)
+        assert l >= 2, 'list size must not be smaller than 2'
+        for i in range(l-1):
+            self.register(ls[i], ls[i+1])
+    
+    def register(self, a, b):
+        'a -> b'
+        
+        
+        
 
 class Vec:
     def __init__(self, x, y):
@@ -133,7 +150,9 @@ class Figure:
 
     def draw(self, off=None, unit=None):
         if off is None:
-            off  = self.calcoff();
+            off = self.calcoff();
+#        else:
+#            off = off + self.orig
         if unit is None:
             unit = self.calcunit();
         for f in self.ch:
@@ -142,9 +161,11 @@ class Figure:
     '''***************** helper funcs *****************'''
     def orig_to_ac(self):
         if self.p is not None:
-            return self.orig + self.p.orig_to_ac()
-        # return self.orig
+            tmp = self.orig + self.p.orig_to_ac()
+            print("tmp: ", tmp)
+            return tmp
         return Vec(0, 0)
+#        return self.orig
 
     def rrc_to_ac(self, p):
         return self.orig_to_ac() + p/self.vec
@@ -152,22 +173,37 @@ class Figure:
     def ac_to_rrc(self, p):
         return (p - self.orig_to_ac())//self.vec
 
+#    def yieldmg_ac(self):
+#        if self.mg:
+#            tmp = self.rrc_to_ac(self.mg[0]); self.mg = self.mg[1:]
+#            # tmp = self.mg[0] / self.vec; self.mg = self.mg[1:]
+#            return tmp
+#        for c in self.ch:
+#            t = c.yieldmg_ac()
+#            if t is not None:
+#                return t
+
     def yieldmg_ac(self):
         if self.mg:
-            tmp = self.rrc_to_ac(self.mg[0]); self.mg = self.mg[1:]
-            # tmp = self.mg[0] / self.vec; self.mg = self.mg[1:]
+            tmp = self.mg[0] / self.vec; self.mg = self.mg[1:]
             return tmp
         for c in self.ch:
             t = c.yieldmg_ac()
             if t is not None:
-                return t
+                return t + c.orig
     '''************************************************'''
 
     def __add__(self, other):
         # d = other.nextmg_ac() - self.nextmg_ac()
         ss = self.yieldmg_ac()
+#        print("ss: ", ss)
         oo = other.yieldmg_ac()
         d = ss - oo
+#        print()
+#        print("ss: ", ss)
+#        print("oo: ", oo)
+#        print("d: ", d)
+#        print()
 
         # d = other.yieldmg_ac() - self.yieldmg_ac() 
         u, v = d.x, d.y
@@ -199,11 +235,15 @@ class Figure:
         f = deepcopy(self); f.mg = [p] + f.mg
         return f
 
+    def __call__(self, *args, **kwargs):
+        
+
     def __deepcopy__(self, memo):
         f = Figure(deepcopy(self.i, memo), deepcopy(self.o, memo), deepcopy(self.mg, memo))
         f.orig = deepcopy(self.orig, memo)
         f.vec  = deepcopy(self.vec, memo)
         f.ch   = deepcopy(self.ch, memo)
+        f.p = deepcopy(self.p, memo)
         return f
 
     def __str__(self):
@@ -238,6 +278,11 @@ class Rect(Figure):
         return r
 
 class Circle(Figure):
+
+    @property
+    def r(self):
+        return self.vec.x / 2
+
     def __init__(self, r):
         super(Circle, self).__init__(_vec=Vec(r, r)*2)
 
@@ -252,6 +297,27 @@ class Circle(Figure):
         r.__class__ = self.__class__
         return r
 
+class Line(Figure):
+    
+    @property
+    def l(self):
+        return self.vec.r()
+
+    def __init__(self, x, y=0):
+        super(Line, self).__init__(_vec=Vec(x, y))
+
+    def draw(self, off=Vec(0,0), unit=None):
+        if unit is None:
+            unit = self.calcunit()
+        orig = (off + self.orig) / unit; end = orig + self.vec
+        print('''<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke-width="1" />'''.format(x1=orig.x, y1=orig.y, x2=end.x, y2=end.y))
+
+    def __deepcopy__(self, memo):
+        r = deepcopy(super(Line, self), memo)
+        r.__class__ = self.__class__
+        return r
+
+
 def begin():
     print('''<?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
@@ -263,16 +329,69 @@ def begin():
 def end():
     print('</svg>')
 
+def f(fig):
+    return fig[Vec(0,1)][Vec(1,1)] + fig[Vec(0,1)][Vec(0,0)] + fig[Vec(1,0)] + fig[Vec(1,0)]
+
+def g(inc):
+    r = inc.vec.x / 2
+    top = Vec(1/2,0); outc = Circle((1 + 2*sqrt(3)/3) * r)
+    inccc = inc[d(-60)][d(-120)] + inc[d(60)] + inc[d(120)]
+    return inccc[top] + outc[top]
+
+def h(inc):
+    r = inc.vec.x / 2
+    btm = Vec(1/2,1); outc = Circle((1 + 2*sqrt(3)/3) * r)
+    inccc = inc[d(-60)][d(0)] + inc[d(180)] + inc[d(120)]
+    return inccc[btm] + outc[btm]
+
+def koch(f):
+    return f[Vec(1,1)] + f[Vec()]
+
 def d(deg):
     return Vec(1/2,1/2) + Vec(1/2,0).rot(deg)
 
 def sketch():
     begin()
-    top = Vec(1/2,0)
-    inc = Circle(1); outc = Circle(1 + 2*sqrt(3)/3)
-    inccc = inc[d(-60)][d(-120)] + inc[d(60)] + inc[d(120)]
-    c = inccc[top] + outc[top]
-    c.draw()
+
+#    r = Rect(1, 1)
+#    for i in range(5):
+#        r = f(r)
+#    r.draw()
+
+#    ************* f1 ************
+#    inc = Circle(1)
+#    for i in range(6):
+#        inc = g(inc)
+#    inc.draw()
+#    *****************************
+
+#    ************* f2 ************
+#    inc = Circle(1)
+#    for i in range(6):
+#        inc = g(inc) if i % 2 == 1 else h(inc)
+#    inc.draw()
+#    *****************************
+
+#    ************* f3 ************
+    inc = Circle(1); n = 2
+    for i in range(n):
+        inc = g(inc)
+    inc.draw()
+#    *****************************
+
+#    r1 = Rect(1,2); r2 = Rect(1,1)
+#    r = r1[Vec(1,3/4)][Vec(1,1/4)] + r2[Vec(0,1/2)] + r2[Vec(0,1/2)]
+#    r.draw()
+
+#    r1 = Rect(1,2)[Vec(1,3/4)][Vec(1,1/4)]; r2 = Rect(1,1)
+#    r = r1 + r2[Vec(0,1/2)] + r2[Vec(0,1/2)]
+#    r.draw()
+
+#    top = Vec(1/2,0)
+#    inc = Circle(1); outc = Circle(1 + 2*sqrt(3)/3)
+#    inccc = inc[d(-60)][d(-120)] + inc[d(60)] + inc[d(120)]
+#    c = inccc[top] + outc[top]
+#    c.draw()
 
 #    a = r[Vec(1/3,1)] + r[Vec(11/12,0)]
 #    a.draw()
