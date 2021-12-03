@@ -438,10 +438,11 @@ class Declare(Figure):
 
     def _align(self):
         global morph; l = len(self.ls); 
-        coff = Vec(0, 0); 
+        coff = morph[self.ls[0]].orig
         for i, j in enumerate(self.ls):
             F = morph[j]
-            F.orig = F.orig + coff
+            if i != 0:
+                F.orig = F.orig + coff
             # update coff
             coff = coff + self._rule(i, l)
 
@@ -547,7 +548,12 @@ def sketch():
 #    inc.draws()
 #    *****************************
 
-    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(0) * 3)
+    d = Declare([1,2,3], lambda i, N: Vec.d(0) * 3)
+    e = Declare([3,4,5,6,7], lambda i, N: Vec.d(-360 * i / N) * 4)
+    f = Declare([5,8,9], lambda i, N: Vec.d(-60) * 3)
+    g = Declare([9,10,11,12,13,14], lambda i, N: Vec.d(180) * 2)
+
+#    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(0) * 3)
     c = Connect([1,2,3,4,5,6,7]);
     c2 = Connect([1,3,6])
     # c = Connect([1,3,7])
@@ -562,8 +568,8 @@ def sketch():
     b = Rect(1,2); b.i = [Vec(0,1/4), Vec(0,3/4)]; b.mg = [Vec(1,1/4), Vec(1,3/4)]
     y = b + a[Vec(0,1/2)] + a[Vec(0,1/2)]
 #    
-    x(2,4,5,7); y(1,3,6);
-    d.draws()
+    x(2,4,5,7,8); y(1,3,6,9);
+    d.draws(); e.draws(); f.draws(); g.draws()
     c.draws()
     c2.draws()
 #    re1.draws()
