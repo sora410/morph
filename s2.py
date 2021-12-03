@@ -2,7 +2,7 @@
 
 from math import cos, sin, radians, sqrt
 from copy import copy, deepcopy
-from collections import deque
+from collections import deque, defaultdict
 from functools import reduce
 
 # W = 500; H = 500
@@ -31,7 +31,7 @@ class LogicDB:
         'a -> b'
 '''
         
-morph = {}
+morph = defaultdict(lambda: Ghost())
 
 class Vec:
     def __init__(self, x, y):
@@ -262,7 +262,7 @@ class Figure:
     def __call__(self, *args, **kwargs):
         global morph
         for a in args:
-            morph[a] = deepcopy(self)
+            morph[a] = self.reorig(morph[a].orig)
 
     def __deepcopy__(self, memo):
         f = Figure(deepcopy(self.i, memo), deepcopy(self.o, memo), deepcopy(self.mg, memo))
@@ -375,13 +375,6 @@ class Relate(Figure):
     def __init__(self, ls, rule):
         super(Relate, self).__init__()
         self._ls = ls; self._rule = rule
-#       self._bewitch()
-
-    def _bewitch(self):
-        global morph; G = Ghost()
-        for i in self.ls:
-            if i not in morph:
-                G(i)
 
     def draw(self, off, unit):
         global morph; l = len(self.ls) 
@@ -434,14 +427,14 @@ class Declare(Figure):
     def __init__(self, ls, rule):
         super(Declare, self).__init__()
         self._ls = ls; self._rule = rule
-        self._bewitch()
+#        self._bewitch()
         self._align()
 
-    def _bewitch(self):
-        global morph; G = Ghost()
-        for i in self.ls:
-            if i not in morph:
-                G(i)
+#    def _bewitch(self):
+#        global morph; G = Ghost()
+#        for i in self.ls:
+#            if i not in morph:
+#                G(i)
 
     def _align(self):
         global morph; l = len(self.ls); 
@@ -554,9 +547,11 @@ def sketch():
 #    inc.draws()
 #    *****************************
 
-    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(-360 * i / N) * 3)
-    c = Connect([1,3,7])
-    d.draws(); c.draws()
+    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(0) * 3)
+    c = Connect([1,2,3,4,5,6,7]);
+    c2 = Connect([1,3,6])
+    # c = Connect([1,3,7])
+    #d.draws(); c.draws()
 
 #    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(-30) * i);
 #    c = Connect([1,3,7])
@@ -568,8 +563,9 @@ def sketch():
     y = b + a[Vec(0,1/2)] + a[Vec(0,1/2)]
 #    
     x(2,4,5,7); y(1,3,6);
-#    d.draws()
-#    c.draws()
+    d.draws()
+    c.draws()
+    c2.draws()
 #    re1.draws()
     
     end()
