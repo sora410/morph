@@ -291,18 +291,26 @@ class Figure:
 class Ghost(Figure):
     def __init__(self):
         super(Ghost, self).__init__()
+        self.c = Circle(1)
 
     def yieldin(self):
-        return Vec(1/2,1/2) / self.vec
+        return Vec(1/2,1/2) / self.c.vec
 
     def yieldout(self):
-        return Vec(1/2,1/2) / self.vec
+        return Vec(1/2,1/2) / self.c.vec
 
     def yieldmg(self):
-        return Vec(1/2,1/2) / self.vec
+        return Vec(1/2,1/2) / self.c.vec
     
     def draw(self, off, unit):
-        c = Circle(self.x); c.draw(off, unit)
+        self.c.orig = self.orig
+        self.c.draw(off, unit)
+
+    def __deepcopy__(self, memo):
+        r = deepcopy(super(Ghost, self), memo)
+        r.__class__ = self.__class__
+        r.c = deepcopy(self.c)
+        return r
 
 class Path(Figure):
     @property
@@ -333,8 +341,9 @@ class Path(Figure):
         path += "z"
         print('''<path d="{}" stroke="black" stroke-width="1" />'''.format(path))
 
+# ************************* Relate Modules ****************************
 
-class Relation(Figure):
+class Relate(Figure):
     @property
     def ls(self):
         return self._ls
@@ -356,57 +365,105 @@ class Relation(Figure):
     def d(self, _d):
         self._d = _d
 
-    def __init__(self, ls, d=Vec.d(0)):
-        super(Relation, self).__init__()
-        self._ls = ls; self._d = d; self._path = []
-        self._bewitch()
-#        self._align()
-    
+    @property
+    def rule(self):
+        return self._rule
+    @rule.setter
+    def rule(self, _rule):
+        self._rule = _rule
+
+    def __init__(self, ls, rule):
+        super(Relate, self).__init__()
+        self._ls = ls; self._rule = rule
+#       self._bewitch()
+
     def _bewitch(self):
         global morph; G = Ghost()
         for i in self.ls:
             if i not in morph:
                 G(i)
 
-#    def _align(self):
-#        global morph
-#        l = len(self.ls); 
-#        coff = Vec(0, 0); 
-#        F1 = None; F2 = None
-#        for i in range(l-1):
-#            j = self.ls[i]; k = self.ls[i+1]
-#            F1 = morph[j]; F2 = morph[k]
-#            outp = F1.yieldout(); inp = F2.yieldin();
-#            F1.orig = F1.orig + coff
-#            # F1.draw(coff, unit);
-#            P = Path(); P.orig = coff; P.m(outp).l(self.d)
-#            self.path.append(P)
-#            #P.draw(coff, unit);
-#            # update coff
-#            coff = coff + outp + self.d - inp
-#        F2.orig = F2.orig + coff
-#
-#    def draw(self, off, unit):
-#        global morph
-#        for j in self.ls:
-#            morph[j].draw(off, unit)
-#        for p in self.path:
-#            p.draw(off, unit)
-
     def draw(self, off, unit):
         global morph; l = len(self.ls) 
         coff = off
-        F1 = None; F2 = None
         for i in range(l-1):
             j = self.ls[i]; k = self.ls[i+1]
             F1 = morph[j]; F2 = morph[k]
-            F1.draw(coff, unit);
             outp = F1.yieldout(); inp = F2.yieldin();
-            P = Path(); P.m(outp).l(self.d)
-            P.draw(coff, unit);
+            self._rule(F1.orig + outp, F2.orig + inp).draw(coff, unit)
+
+    def __deepcopy__(self, memo):
+        r = deepcopy(super(Relate, self), memo)
+        r.__class__ = self.__class__
+        r.ls = deepcopy(self.ls)
+        r.d  = deepcopy(self.d)
+        r.path = deepcopy(self.path)
+        r.rule = deepcopy(self.rule)
+        return r
+
+
+class Connect(Relate):
+    def __init__(self, ls):
+        rule = lambda b, e: Path().m(b).l(e - b)
+        super(Connect, self).__init__(ls, rule)
+
+# **********************************************************************
+
+class Declare(Figure):
+    @property
+    def ls(self):
+        return self._ls
+    @ls.setter
+    def ls(self, _ls):
+        self._ls = _ls
+
+    @property
+    def d(self):
+        return self._d
+    @d.setter
+    def d(self, _d):
+        self._d = _d
+
+    @property
+    def rule(self):
+        return self._rule
+    @rule.setter
+    def rule(self, _rule):
+        self._rule = _rule
+
+    def __init__(self, ls, rule):
+        super(Declare, self).__init__()
+        self._ls = ls; self._rule = rule
+        self._bewitch()
+        self._align()
+
+    def _bewitch(self):
+        global morph; G = Ghost()
+        for i in self.ls:
+            if i not in morph:
+                G(i)
+
+    def _align(self):
+        global morph; l = len(self.ls); 
+        coff = Vec(0, 0); 
+        for i, j in enumerate(self.ls):
+            F = morph[j]
+            F.orig = F.orig + coff
             # update coff
-            coff = coff + outp + self.d - inp
-        F2.draw(coff, unit);
+            coff = coff + self._rule(i, l)
+
+    def draw(self, off, unit):
+        global morph
+        for j in self.ls:
+            morph[j].draw(off, unit)
+
+    def __deepcopy__(self, memo):
+        r = deepcopy(super(Declare, self), memo)
+        r.__class__ = self.__class__
+        r.ls = deepcopy(self.ls)
+        r.rule = deepcopy(self.rule)
+        return r
+
 
 class Rect(Figure):
     def __init__(self, w, h):
@@ -497,17 +554,23 @@ def sketch():
 #    inc.draws()
 #    *****************************
 
-#    re1 = Relation([1,3,5], Vec.d(0) * 3.5);
-    re2 = Relation([1,2,3,4,5,6], Vec.d(0) * 2);
-    
+    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(-360 * i / N) * 3)
+    c = Connect([1,3,7])
+    d.draws(); c.draws()
+
+#    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(-30) * i);
+#    c = Connect([1,3,7])
+##    re1 = Relation([1,3,6], Vec.d(0) * 3.5);
+#    
     a = Rect(1,1); a.o = [Vec(1/2,1/2)]; 
     x = Rect(1,1)[Vec(1,1/2)] + a[Vec(0,1/2)]; x.i = [Vec(0,1/2)]
     b = Rect(1,2); b.i = [Vec(0,1/4), Vec(0,3/4)]; b.mg = [Vec(1,1/4), Vec(1,3/4)]
     y = b + a[Vec(0,1/2)] + a[Vec(0,1/2)]
-    
-    x(2,4,5); y(1,3,6);
+#    
+    x(2,4,5,7); y(1,3,6);
+#    d.draws()
+#    c.draws()
 #    re1.draws()
-    re2.draws()
     
     end()
 
