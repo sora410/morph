@@ -1,0 +1,82 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+    "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="18.0cm" height="18.0cm" viewBox="0 0 1800 1800"
+    xmlns="http://www.w3.org/2000/svg" version="1.1">
+<title>a</title>
+
+<defs>
+    <marker id="Triangle"
+      viewBox="0 0 10 10" refX="10" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="12" markerHeight="12"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <marker id="Dot"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="10" markerHeight="10"
+      orient="auto">
+      <circle cx="5" cy="5" r="4.5" fill="black" stroke="black" />
+    </marker>
+</defs>
+<rect x="0.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="0.0" y="0.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="100.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<text x="125.0" y="75.0" font-family="Latin Modern Math" font-size="37.5" fill="black" >
+	<tspan text-anchor="middle" dominant-baseline="central">1</tspan>
+</text>
+<rect x="150.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="250.0" y="0.0" width="50.0" height="100.0" fill="none" stroke="black" />
+<text x="275.0" y="50.0" font-family="Latin Modern Math" font-size="37.5" fill="black" >
+	<tspan text-anchor="middle" dominant-baseline="central">2</tspan>
+</text>
+<rect x="300.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="300.0" y="0.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="400.0" y="0.0" width="50.0" height="100.0" fill="none" stroke="black" />
+<text x="425.0" y="50.0" font-family="Latin Modern Math" font-size="37.5" fill="black" >
+	<tspan text-anchor="middle" dominant-baseline="central">3</tspan>
+</text>
+<rect x="450.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="450.0" y="0.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="550.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<text x="575.0" y="75.0" font-family="Latin Modern Math" font-size="37.5" fill="black" >
+	<tspan text-anchor="middle" dominant-baseline="central">4</tspan>
+</text>
+<rect x="600.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="700.0" y="0.0" width="50.0" height="100.0" fill="none" stroke="black" />
+<text x="725.0" y="50.0" font-family="Latin Modern Math" font-size="37.5" fill="black" >
+	<tspan text-anchor="middle" dominant-baseline="central">5</tspan>
+</text>
+<rect x="750.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="750.0" y="0.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="850.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<text x="875.0" y="75.0" font-family="Latin Modern Math" font-size="37.5" fill="black" >
+	<tspan text-anchor="middle" dominant-baseline="central">6</tspan>
+</text>
+<rect x="900.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="1000.0" y="0.0" width="50.0" height="100.0" fill="none" stroke="black" />
+<text x="1025.0" y="50.0" font-family="Latin Modern Math" font-size="37.5" fill="black" >
+	<tspan text-anchor="middle" dominant-baseline="central">7</tspan>
+</text>
+<rect x="1050.0" y="50.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="1050.0" y="0.0" width="50.0" height="50.0" fill="none" stroke="black" />
+<rect x="1150.0" y="0.0" width="50.0" height="100.0" fill="none" stroke="black" />
+<text x="1175.0" y="50.0" font-family="Latin Modern Math" font-size="25.0" fill="black" >
+	<tspan text-anchor="middle" dominant-baseline="central">Nil</tspan>
+</text>
+<path d="M 25.0 75.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 175.0 75.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 325.0 75.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 475.0 75.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 625.0 75.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 775.0 75.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 925.0 75.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 1075.0 75.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 25.0 25.0l 225.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 325.0 25.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 475.0 25.0l 225.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 775.0 25.0l 225.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+<path d="M 1075.0 25.0l 75.0 0.0" stroke="black" stroke-width="1" marker-start="url(#Dot)" marker-end="url(#Triangle)"  />
+</svg>

@@ -317,6 +317,31 @@ class Path(Figure):
     def data(self):
         return self._data
 
+    @property
+    def mstart(self):
+        return self._mstart
+    @mstart.setter
+    def mstart(self, _mstart):
+        self._mstart = _mstart
+    
+    @property
+    def mmiddle(self):
+        return self._mmiddle
+    @mmiddle.setter
+    def mmiddle(self, _mmiddle):
+        self._mmiddle = _mmiddle
+
+    @property
+    def mend(self):
+        return self._mend
+    @mend.setter
+    def mend(self, _mend):
+        self._mend = _mend
+
+    def M(self, _M):
+        self._data.append(("M", _M))
+        return self
+
     def m(self, _m):
         self._data.append(("m", _m))
         return self
@@ -325,21 +350,31 @@ class Path(Figure):
         self._data.append(("l", _l))
         return self
 
-#    def z(self):
-#        return self
-
-    def __init__(self):
+    def __init__(self, begin, mstart=None, mmiddle=None, mend=None):
         super(Path, self).__init__()
-        self._data = []
+        self._data = []; self._mstart = mstart;
+        self._mmiddle = mmiddle; self._mend = mend
+        self.M(begin)
+
+    def marker_param(self):
+        p = ''
+        if self.mstart is not None:
+            p += '''marker-start="url(#{marker})" '''.format(marker=self.mstart)
+        if self.mmiddle is not None:
+            p += '''marker-mid="url(#{marker})" '''.format(marker=self.mmiddle)
+        if self.mend is not None:
+            p += '''marker-end="url(#{marker})" '''.format(marker=self.mend)
+        return p
 
     def draw(self, off, unit):
         orig = (off + self.orig) / unit
-        path = "M {} {}".format(orig.x, orig.y)
+        path = ''
         for d in self.data:
             cmd, p = d; p = p / unit
+            if cmd.isupper():
+                p = p + orig
             path += "{} {} {}".format(cmd, p.x, p.y)
-        path += "z"
-        print('''<path d="{}" stroke="black" stroke-width="1" />'''.format(path))
+        print('''<path d="{}" stroke="black" stroke-width="1" {mp} />'''.format(path, mp=self.marker_param()))
 
 # class Arrow(Path):
     
@@ -381,12 +416,11 @@ class Relate(Figure):
 
     def draw(self, off, unit):
         global morph; l = len(self.ls) 
-        coff = off
         for i in range(l-1):
             j = self.ls[i]; k = self.ls[i+1]
             F1 = morph[j]; F2 = morph[k]
             outp = F1.yieldout(); inp = F2.yieldin();
-            self._rule(F1.orig + outp, F2.orig + inp).draw(coff, unit)
+            self._rule(F1.orig + outp, F2.orig + inp).draw(off, unit)
 
     def __deepcopy__(self, memo):
         r = deepcopy(super(Relate, self), memo)
@@ -399,8 +433,8 @@ class Relate(Figure):
 
 
 class Connect(Relate):
-    def __init__(self, ls):
-        rule = lambda b, e: Path().m(b).l(e - b)
+    def __init__(self, ls, bm=None, em=None):
+        rule = lambda b, e: Path(b, mstart=bm, mend=em).l(e - b)
         super(Connect, self).__init__(ls, rule)
 
 # **********************************************************************
@@ -610,9 +644,23 @@ def begin():
 <title>a</title>'''.format(W_cm=MAX/100, H_cm=MAX/100, W=MAX, H=MAX))
 
 def defs():
-    print('<defs>')
-    print('\t<marker id=>')
-    print('</defs>')
+    print('''
+<defs>
+    <marker id="Triangle"
+      viewBox="0 0 10 10" refX="10" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="12" markerHeight="12"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <marker id="Dot"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="10" markerHeight="10"
+      orient="auto">
+      <circle cx="5" cy="5" r="4.5" fill="black" stroke="black" />
+    </marker>
+</defs>''')
 
 def end():
     print('</svg>')
@@ -637,9 +685,7 @@ def d(deg):
 
 def sketch():
     begin()
-
-#    r = Rect(1,1); f(r).draws();
-
+    defs()
 #    ************* f2 ************
 #    inc = Circle(1)
 #    for i in range(6):
@@ -647,39 +693,26 @@ def sketch():
 #    inc.draws()
 #    *****************************
 
-#    d = Declare([1,2,3], lambda i, N: Vec.d(0) * 3)
-#    e = Declare([3,4,5,6,7], lambda i, N: Vec.d(-360 * i / N) * 4)
-#    f = Declare([5,8,9], lambda i, N: Vec.d(-60) * 3)
-#    g = Declare([9,10,11,12,13,14], lambda i, N: Vec.d(180) * 2)
-#
-##    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(0) * 3)
-#    c = Connect([1,2,3,4,5,6,7]);
-#    c2 = Connect([1,3,6])
-    # c = Connect([1,3,7])
-    #d.draws(); c.draws()
-
-    ids    = list(range(8));
+    ids    = list(range(8)) + [-1];
     primes = [2,3,5,7];
-    d = Declare(ids, lambda i, N: Vec.d(0) * 3)
-    c1 = Connect(ids);
-    c2 = Connect(primes);
+#    ids    = [0,1,203,3,4,5,6,7]
+#    primes = [203,3,5,7];
 
-#    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(-30) * i);
-#    c = Connect([1,3,7])
-##    re1 = Relation([1,3,6], Vec.d(0) * 3.5);
-#
-#   ******************************************* 
-#    a = Rect(1,1); a.o = [Vec(1/2,1/2)]; 
-#    x = Rect(1,1)[Vec(1,1/2)] + a[Vec(0,1/2)]; x.i = [Vec(0,1/2)]
-#    x.orig = Vec(0,1)
-#    b = Rect(1,2); b.i = [Vec(0,3/4), Vec(0,1/4)]; b.mg = [Vec(1,3/4), Vec(1,1/4)]
-#    y = b + a[Vec(0,1/2)] + a[Vec(0,1/2)]
-#    x(*(set(ids) - set(primes))); y(*primes);
-#   ******************************************* 
+    d = Declare(ids, lambda i, N: Vec.d(0) * 3 if i != 0 else Vec.d(0) * 2)
+#    d = Declare(ids, lambda i, N: Vec.d(0) * sqrt(i+4))
+    c1 = Connect(ids, bm="Dot", em="Triangle")
+    c2 = Connect([0] + primes + [-1], bm="Dot", em="Triangle")
 
-    a = Rect(1,1)[Vec(1/2,1/2)] + Dot(1/10)[Vec(1/2,1/2)]; a.o = [Vec(1/2,1/2)];
+    a = Rect(1,1); a.o = [Vec(1/2,1/2)]
+    aa = a[Vec(1/2,0)] + a[Vec(1/2,1)]
+    aa.orig = Vec(0,0)
 
-    s = lambda text: Text(text, 3/4, Ver.top, Hor.mid)
+#    s = lambda text: Text(text, 3/4, Ver.mid, Hor.mid)
+    s = lambda text: Text(text, (7/2-len(text)/2)/4, Ver.mid, Hor.mid)
+
+    def r(text):
+        b = Rect(1,2); b.i = [Vec(0,3/4), Vec(0,1/4)]
+        return b[Vec(1/2,1/2)] + s(text)
 
     def np(text):
         b = Rect(1,1)[Vec(1/2,1/2)] + s(text)
@@ -688,13 +721,15 @@ def sketch():
         return x
         
     def p(text):
-        b = Rect(1,2); b.i = [Vec(0,3/4), Vec(0,1/4)]; b.mg = [Vec(1,3/4), Vec(1,1/4)]
-        c = b[Vec(1/2,1/2)] + s(text)
-        y = c + a[Vec(0,1/2)] + a[Vec(0,1/2)]
+        y = r(text)[Vec(1,1/2)] + aa[Vec(0,1/2)]
         return y
 
     for i in ids:
         t = str(i)
+        if i == 0:
+            aa(i); continue
+        if i == -1:
+            r("Nil")(i); continue
         if i in primes:
             p(t)(i)
         else:
@@ -703,7 +738,6 @@ def sketch():
     d.draws();
     c1.draws();
     c2.draws();
-#    re1.draws()
     
     end()
 
