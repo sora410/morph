@@ -4,9 +4,22 @@ from math import cos, sin, radians, sqrt
 from copy import copy, deepcopy
 from collections import deque, defaultdict
 from functools import reduce
+import enum
 
 # W = 500; H = 500
 MAX = 1800
+
+@enum.unique
+class Ver(enum.Enum):
+    top = 0
+    mid = 1
+    bottom = 2
+
+@enum.unique
+class Hor(enum.Enum):
+    left = 0
+    mid = 1
+    right = 2
 
 class ImplementationException(Exception):
     def __init__(self, arg=""):
@@ -15,22 +28,6 @@ class ImplementationException(Exception):
     def __str__(self):
         return "at {}".format(self.arg)
 
-'''
-class LogicDB:
-    def __init__(self):
-        pass
-    
-    def register(self, ls):
-        'l1 -> l2 -> ... -> ln, where ls = [l1,l2,...,ln]'
-        l = len(ls)
-        assert l >= 2, 'list size must not be smaller than 2'
-        for i in range(l-1):
-            self.register(ls[i], ls[i+1])
-    
-    def register(self, a, b):
-        'a -> b'
-'''
-        
 morph = defaultdict(lambda: Ghost())
 
 class Vec:
@@ -88,6 +85,7 @@ class Vec:
     def __str__(self):
         return "({}, {})".format(self.x, self.y)
 
+UNIT = Vec(50,50)
 
 class Figure:
 
@@ -166,7 +164,7 @@ class Figure:
         x, y = self.orig.x, self.orig.y
         return Vec(-x*(x < 0), -y*(y < 0))
 
-    def draws(self, off=Vec(0,0), unit=Vec(50,50)):
+    def draws(self, off=Vec(0,0), unit=UNIT):
 #        self.draw(self.calcoff(), self.calcunit())
         self.draw(off + self.calcoff(), unit)
 
@@ -262,7 +260,9 @@ class Figure:
     def __call__(self, *args, **kwargs):
         global morph
         for a in args:
-            morph[a] = self.reorig(morph[a].orig)
+            # morph[a] = self.reorig(morph[a].orig)
+            # ↓ is really good?
+            morph[a] = self.reorig(morph[a].orig + self.orig)
 
     def __deepcopy__(self, memo):
         f = Figure(deepcopy(self.i, memo), deepcopy(self.o, memo), deepcopy(self.mg, memo))
@@ -291,7 +291,7 @@ class Figure:
 class Ghost(Figure):
     def __init__(self):
         super(Ghost, self).__init__()
-        self.c = Circle(1)
+        self.c = Circle(1/2)
 
     def yieldin(self):
         return Vec(1/2,1/2) / self.c.vec
@@ -340,6 +340,9 @@ class Path(Figure):
             path += "{} {} {}".format(cmd, p.x, p.y)
         path += "z"
         print('''<path d="{}" stroke="black" stroke-width="1" />'''.format(path))
+
+# class Arrow(Path):
+    
 
 # ************************* Relate Modules ****************************
 
@@ -476,18 +479,30 @@ class Circle(Figure):
     @property
     def r(self):
         return self.vec.x / 2
+    @property
+    def fill(self):
+        return self._fill
+    @fill.setter
+    def fill(self, _fill):
+        self._fill = _fill
 
-    def __init__(self, r):
+    def __init__(self, r, fill="none"):
         super(Circle, self).__init__(_vec=Vec(r, r)*2)
+        self._fill = fill
 
     def draw(self, off, unit):
         orig = (off + self.orig) / unit; size = self.vec / unit; center = orig + size * (1/2)
-        print('''<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="black" />'''.format(cx=center.x, cy=center.y, r=size.x / 2))
+        print('''<circle cx="{cx}" cy="{cy}" r="{r}" fill="{fill}" stroke="black" />'''.format(cx=center.x, cy=center.y, r=size.x / 2, fill=self.fill))
 
     def __deepcopy__(self, memo):
         r = deepcopy(super(Circle, self), memo)
         r.__class__ = self.__class__
+        r.fill = self.fill
         return r
+
+class Dot(Circle):
+    def __init__(self, r):
+        super(Dot, self).__init__(r, "black")
 
 class Line(Figure):
     @property
@@ -506,6 +521,85 @@ class Line(Figure):
         r.__class__ = self.__class__
         return r
 
+class Text(Figure):
+    @property
+    def text(self):
+        return self._text
+    @text.setter
+    def text(self, text):
+        self._text = text
+
+    @property
+    def ver(self):
+        return self._ver
+    @ver.setter
+    def ver(self, ver):
+        self._ver = ver
+
+    @property
+    def hor(self):
+        return self._hor
+    @hor.setter
+    def hor(self, hor):
+        self._hor = hor
+
+    @property
+    def fsize(self):
+        return self._fsize
+    @fsize.setter
+    def fsize(self, fsize):
+        self._fsize = fsize
+
+    @property
+    def ffam(self):
+        return self._ffam
+    @ffam.setter
+    def ffam(self, ffam):
+        self._ffam = ffam
+
+    def __init__(self, text, fsize=1, ver=Ver.top, hor=Hor.left, ffam="Latin Modern Math"):
+        super(Text, self).__init__()
+        self._text = text; self._ver = ver; self._hor = hor;
+        self._fsize = fsize; self._ffam = ffam;
+        self.vec = Vec(0,0);
+
+    def yieldmg(self):
+        return Vec(0,0)
+
+    def _convert(self, ver, hor):
+        v, h = None, None
+        if ver == Ver.top:
+            v = "text-before-edge"
+        elif ver == Ver.mid:
+            v = "central"
+        elif ver == Ver.bottom:
+            v = "text-after-edge"
+        
+        if hor == Hor.left:
+            h = "start"
+        elif hor == Hor.mid:
+            h = "middle"
+        elif hor == Hor.right:
+            h = "end"
+
+        return v, h
+
+    def draw(self, off, unit):
+        orig = (off + self.orig) / unit; fsize = self.fsize * unit.y; v, h = self._convert(self.ver, self.hor)
+        print('''<text x="{x}" y="{y}" font-family="{f}" font-size="{s}" fill="black" >'''.format(x=orig.x, y=orig.y, f=self.ffam, s=fsize))
+        print('''\t<tspan text-anchor="{h}" dominant-baseline="{v}">{text}</tspan>'''.format(text=self.text, v=v, h=h))
+        print('''</text>''')
+
+    def __getitem__(self, p):
+        raise ImplementationException("Text cannot deal with [] now")
+
+    def __deepcopy__(self, memo):
+        r = deepcopy(super(Text, self), memo)
+        r.__class__ = self.__class__
+        r.text = self.text;  r.fsize = self.fsize;
+        r.ver = self.ver; r.hor = self.hor;
+        r.ffam = self.ffam
+        return r
 
 def begin():
     print('''<?xml version="1.0" standalone="no"?>
@@ -514,6 +608,11 @@ def begin():
 <svg width="{W_cm}cm" height="{H_cm}cm" viewBox="0 0 {W} {H}"
     xmlns="http://www.w3.org/2000/svg" version="1.1">
 <title>a</title>'''.format(W_cm=MAX/100, H_cm=MAX/100, W=MAX, H=MAX))
+
+def defs():
+    print('<defs>')
+    print('\t<marker id=>')
+    print('</defs>')
 
 def end():
     print('</svg>')
@@ -548,30 +647,62 @@ def sketch():
 #    inc.draws()
 #    *****************************
 
-    d = Declare([1,2,3], lambda i, N: Vec.d(0) * 3)
-    e = Declare([3,4,5,6,7], lambda i, N: Vec.d(-360 * i / N) * 4)
-    f = Declare([5,8,9], lambda i, N: Vec.d(-60) * 3)
-    g = Declare([9,10,11,12,13,14], lambda i, N: Vec.d(180) * 2)
-
-#    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(0) * 3)
-    c = Connect([1,2,3,4,5,6,7]);
-    c2 = Connect([1,3,6])
+#    d = Declare([1,2,3], lambda i, N: Vec.d(0) * 3)
+#    e = Declare([3,4,5,6,7], lambda i, N: Vec.d(-360 * i / N) * 4)
+#    f = Declare([5,8,9], lambda i, N: Vec.d(-60) * 3)
+#    g = Declare([9,10,11,12,13,14], lambda i, N: Vec.d(180) * 2)
+#
+##    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(0) * 3)
+#    c = Connect([1,2,3,4,5,6,7]);
+#    c2 = Connect([1,3,6])
     # c = Connect([1,3,7])
     #d.draws(); c.draws()
+
+    ids    = list(range(8));
+    primes = [2,3,5,7];
+    d = Declare(ids, lambda i, N: Vec.d(0) * 3)
+    c1 = Connect(ids);
+    c2 = Connect(primes);
 
 #    d = Declare([1,2,3,4,5,6,7], lambda i, N: Vec.d(-30) * i);
 #    c = Connect([1,3,7])
 ##    re1 = Relation([1,3,6], Vec.d(0) * 3.5);
-#    
-    a = Rect(1,1); a.o = [Vec(1/2,1/2)]; 
-    x = Rect(1,1)[Vec(1,1/2)] + a[Vec(0,1/2)]; x.i = [Vec(0,1/2)]
-    b = Rect(1,2); b.i = [Vec(0,1/4), Vec(0,3/4)]; b.mg = [Vec(1,1/4), Vec(1,3/4)]
-    y = b + a[Vec(0,1/2)] + a[Vec(0,1/2)]
-#    
-    x(2,4,5,7,8); y(1,3,6,9);
-    d.draws(); e.draws(); f.draws(); g.draws()
-    c.draws()
-    c2.draws()
+#
+#   ******************************************* 
+#    a = Rect(1,1); a.o = [Vec(1/2,1/2)]; 
+#    x = Rect(1,1)[Vec(1,1/2)] + a[Vec(0,1/2)]; x.i = [Vec(0,1/2)]
+#    x.orig = Vec(0,1)
+#    b = Rect(1,2); b.i = [Vec(0,3/4), Vec(0,1/4)]; b.mg = [Vec(1,3/4), Vec(1,1/4)]
+#    y = b + a[Vec(0,1/2)] + a[Vec(0,1/2)]
+#    x(*(set(ids) - set(primes))); y(*primes);
+#   ******************************************* 
+
+    a = Rect(1,1)[Vec(1/2,1/2)] + Dot(1/10)[Vec(1/2,1/2)]; a.o = [Vec(1/2,1/2)];
+
+    s = lambda text: Text(text, 3/4, Ver.top, Hor.mid)
+
+    def np(text):
+        b = Rect(1,1)[Vec(1/2,1/2)] + s(text)
+        x = b[Vec(1,1/2)] + a[Vec(0,1/2)]; x.i = [Vec(0,1/2)]
+        x.orig = Vec(0,1)
+        return x
+        
+    def p(text):
+        b = Rect(1,2); b.i = [Vec(0,3/4), Vec(0,1/4)]; b.mg = [Vec(1,3/4), Vec(1,1/4)]
+        c = b[Vec(1/2,1/2)] + s(text)
+        y = c + a[Vec(0,1/2)] + a[Vec(0,1/2)]
+        return y
+
+    for i in ids:
+        t = str(i)
+        if i in primes:
+            p(t)(i)
+        else:
+            np(t)(i)
+
+    d.draws();
+    c1.draws();
+    c2.draws();
 #    re1.draws()
     
     end()
