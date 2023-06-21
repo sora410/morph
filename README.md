@@ -2,5 +2,5 @@
 
 # usage
 ```
-python3 s5.py > foo.svg
+python3 morph.py > foo.svg
 ```
