@@ -1,0 +1,49 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+    "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="30.0cm" height="30.0cm" viewBox="0 0 3000 3000"
+    xmlns="http://www.w3.org/2000/svg" version="1.1">
+<title>a</title>
+
+<defs>
+    <marker id="Triangle"
+      viewBox="0 0 10 10" refX="10" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="12" markerHeight="12"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <marker id="Dot"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="10" markerHeight="10"
+      orient="auto">
+      <circle cx="5" cy="5" r="4.5" fill="black" stroke="black" />
+    </marker>
+</defs>
+<path d="M 760.2886094605818 532.0646588751881l -138.8100527733525 100.85140665450902" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 764.4912301296658 533.1907476895635l -89.87191745867236 276.597320816929" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 768.8421032036675 533.1907476895635l 89.87191745867236 276.597320816929" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 773.0447238727515 532.0646588751881l 138.8100527733525 100.8514066545091" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 617.5367005516777 645.0478512639976l 53.020722179254065 163.18100378023325" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 619.9063558641749 641.3989020719662l 235.28773454092916 170.94654546202116" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 621.2508495844098 637.2609758833637l 290.8316341645138 8.881784197001252e-14" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 680.8773360725681 815.7267109722596l 171.57866118819695 0.0" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 678.1392429282292 812.3454475339873l 235.28773454092925 -170.94654546202105" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 862.7759106024016 808.2288550442308l 53.020722179254065 -163.18100378023317" fill="none" stroke="black" stroke-width="1"   />
+<g transform="rotate(-0.0)">
+<circle cx="766.6666666666666" cy="516.6666666666666" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+<g transform="rotate(-72.0)">
+<circle cx="-416.26956994002575" cy="771.2450591281793" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+<g transform="rotate(-144.0)">
+<circle cx="-1023.9354093719043" cy="-275.12510738701855" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+<g transform="rotate(-216.0)">
+<circle cx="-216.55731533634835" cy="-1176.3958275688108" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+<g transform="rotate(-288.0)">
+<circle cx="890.0956279816116" cy="-687.0415991910565" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+</svg>

@@ -1,0 +1,44 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+    "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="30.0cm" height="30.0cm" viewBox="0 0 3000 3000"
+    xmlns="http://www.w3.org/2000/svg" version="1.1">
+<title>a</title>
+
+<defs>
+    <marker id="Triangle"
+      viewBox="0 0 10 10" refX="10" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="12" markerHeight="12"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <marker id="Dot"
+      viewBox="0 0 10 10" refX="5" refY="5" 
+      markerUnits="strokeWidth"
+      markerWidth="10" markerHeight="10"
+      orient="auto">
+      <circle cx="5" cy="5" r="4.5" fill="black" stroke="black" />
+    </marker>
+</defs>
+<path d="M 264.4912301296658 283.1907476895635l -89.87191745867239 276.597320816929" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 268.84210320366753 283.1907476895635l 89.87191745867227 276.59732081692914" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 119.90635586417486 391.3989020719662l 235.28773454092916 170.94654546202116" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 121.25084958440975 387.2609758833637l 290.83163416451384 8.881784197001252e-14" fill="none" stroke="black" stroke-width="1"   />
+<path d="M 178.13924292822918 562.3454475339872l 235.28773454092925 -170.94654546202096" fill="none" stroke="black" stroke-width="1"   />
+<g transform="rotate(-0.0)">
+<circle cx="266.6666666666667" cy="266.6666666666667" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+<g transform="rotate(-72.0)">
+<circle cx="-333.01393805371106" cy="218.4625523868656" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+<g transform="rotate(-144.0)">
+<circle cx="-472.48059911131213" cy="-366.7634849395185" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+<g transform="rotate(-216.0)">
+<circle cx="41.00486877800692" cy="-680.2489528288374" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+<g transform="rotate(-288.0)">
+<circle cx="497.82300172034974" cy="-288.7675896372163" r="16.666666666666664" fill="red" stroke="black"  />
+</g>
+</svg>

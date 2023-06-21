@@ -622,7 +622,7 @@ class Relate(Pattern):
 
 class Connect(Relate):
     def __init__(self, ls, bm=None, em=None):
-        rule = lambda b, e: Straight(b, e)
+        rule = lambda b, e: Straight(b, e, bm, em)
         super(Connect, self).__init__(ls, rule)
 
 # **********************************************************************
@@ -960,6 +960,48 @@ def rott(n):
     r2.draws()
 
 @morphscript
+def skiplist():
+    ids    = list(range(8)) + [-1];
+    primes = [2,3,5,7];
+
+    d = Declare(ids, lambda i, N: Vec.d(0) * 3 if i != 0 else Vec.d(0) * 2)
+    c1 = Connect(ids, bm="Dot", em="Triangle")
+    c2 = Connect([0] + primes + [-1], bm="Dot", em="Triangle")
+
+    a = Rect(1,1); a.o = [Vec(1/2,1/2)]
+    aa = a[Vec(1/2,0)] + a[Vec(1/2,1)]
+    aa.orig = Vec(0,0)
+
+    s = lambda text: Text(text, (7/2-len(text)/2)/4, Ver.mid, Hor.mid)
+
+    def r(text):
+        b = Rect(1,2); b.i = [Vec(0,3/4), Vec(0,1/4)]
+        return b[Vec(1/2,1/2)] + s(text)
+
+    def np(text):
+        b = Rect(1,1)[Vec(1/2,1/2)] + s(text)
+        x = b[Vec(1,1/2)] + a[Vec(0,1/2)]; x.i = [Vec(0,1/2)]
+        x.orig = Vec(0,1)
+        return x
+        
+    def p(text):
+        y = r(text)[Vec(1,1/2)] + aa[Vec(0,1/2)]
+        return y
+
+    for i in ids:
+        t = str(i)
+        if i == 0:
+            aa(i); continue
+        if i == -1:
+            r("Nil")(i); continue
+        if i in primes:
+            p(t)(i)
+        else:
+            np(t)(i)
+
+    d.draws(); c1.draws(); c2.draws()
+
+@morphscript
 def comp_easy(n):
     ids = list(range(n))
     d = Declare(ids, lambda i, N: Vec.d(180+180/N + 360/N *i) * 4)
@@ -1079,7 +1121,6 @@ def rrot3():
         rr = Rotate(r, i, Vec(0,1/8));
         rr.draws()
     
-
 @morphscript
 def mgtest():
     r = Rect(1,1); rr = r[Vec(1,1/2)] + r[Vec(0,1/2)]; rrr = rr[Vec(1/2,1/2)] + r[Vec(1/2,0)]
@@ -1122,7 +1163,7 @@ def rec3():
     (Rotate(cc, 30) + Rotate(cc, 210)).draws(); 
 
 @morphscript
-def frac(n):
+def domoe(n):
     def d(theta):
         return Vec(1/2,1/2) + Vec.d(theta) / 2
     def f(n):
@@ -1133,4 +1174,4 @@ def frac(n):
         return Rotate(C, 90/n if n > 0 else 0) 
     f(n).draws()
 
-frac(5)
+domoe(5)
