@@ -7,7 +7,7 @@ from functools import reduce
 import enum
 
 # W = 500; H = 500
-MAX = 18000
+MAX = 3000
 
 @enum.unique
 class Ver(enum.Enum):
@@ -230,7 +230,6 @@ class Figure:
         return Vec(-x*(x < 0), -y*(y < 0))
 
     def draws(self, off=Vec(0,0), unit=UNIT):
-#        self.draw(self.calcoff(), self.calcunit())
         self.draw(off + self.calcoff(), unit)
 
     def draw(self, off, unit):
@@ -248,9 +247,7 @@ class Figure:
             corig, cvec = c.rotmeasure(theta, mypiv)
             ox = min(ox, corig.x); oy = min(oy, corig.y)
             ex = max(ex, corig.x + cvec.x); ey = max(ey, corig.y + cvec.y)
-        #print(Vec(ox, oy), Vec(ex - self.orig.x, ey - self.orig.y))
         return self.orig + Vec(ox, oy), Vec(ex - ox, ey - oy)
-        #return Vec(ox, oy), Vec(ex - ox, ey - oy)
 
     '''***************** helper funcs *****************'''
     def orig_to_ac(self):
@@ -258,23 +255,12 @@ class Figure:
             tmp = self.orig + self.p.orig_to_ac()
             return tmp
         return Vec(0, 0)
-#        return self.orig
 
     def rrc_to_ac(self, p):
         return self.orig_to_ac() + p.muleach(self.vec)
 
     def ac_to_rrc(self, p):
         return (p - self.orig_to_ac()).diveach(self.vec)
-
-#    def yieldmg(self):
-#        if self.mg:
-#            tmp = self.rrc_to_ac(self.mg[0]); self.mg = self.mg[1:]
-#            # tmp = self.mg[0] / self.vec; self.mg = self.mg[1:]
-#            return tmp
-#        for c in self.ch:
-#            t = c.yieldmg()
-#            if t is not None:
-#                return t
 
     def yieldin(self):
         if self.i:
@@ -561,7 +547,6 @@ class Path(Figure):
             path += "{} {} {}".format(cmd, p.x, p.y)
         print('''<path d="{}" {p} {mp} />'''.format(path, p=self.param.encode(), mp=self.marker_param()))
 
-# class Arrow(Path):
 class Straight(Path):
     def __init__(self, b, e, bm=None, em=None):
         super(Straight, self).__init__(b, bm, em)
@@ -667,14 +652,7 @@ class Declare(Figure):
     def __init__(self, ls, rule):
         super(Declare, self).__init__()
         self._ls = ls; self._rule = rule
-#        self._bewitch()
         self._align()
-
-#    def _bewitch(self):
-#        global morph; G = Ghost()
-#        for i in self.ls:
-#            if i not in morph:
-#                G(i)
 
     def _align(self):
         global morph; l = len(self.ls); 
@@ -711,7 +689,6 @@ class Rect(Figure):
     def rotmeasure(self, theta, pivot):
         mypiv = pivot - self.orig
         w = self.vec.x; h = self.vec.y
-        # clue_lu = -pivot.muleach(self.vec); clue_ru = clue_lu + Vec(w,0)
         clue_lu = -mypiv; clue_ru = clue_lu + Vec(w,0)
         clue_ld = clue_lu + Vec(0,h); clue_rd = clue_lu + self.vec
         
@@ -723,7 +700,6 @@ class Rect(Figure):
         rotted_u = min(rlu.y, rld.y, rru.y, rrd.y)
         rotted_d = max(rlu.y, rld.y, rru.y, rrd.y)
 
-        # orig = self.orig + pivot.muleach(self.vec) + Vec(rotted_l, rotted_u); vec = self.orig + pivot.muleach(self.vec) + Vec(rotted_r, rotted_d) - orig
         orig = self.orig + mypiv + Vec(rotted_l, rotted_u); vec = self.orig + mypiv + Vec(rotted_r, rotted_d) - orig
         return orig, vec
 
@@ -750,25 +726,10 @@ class Circle(Figure):
 
     def rotmeasure(self, theta, pivot):
         mypiv = pivot - self.orig
-        # clue = (self.center - pivot).muleach(self.vec); 
         clue = self.center.muleach(self.vec) - mypiv;
-        # rotted_center = self.orig + pivot.muleach(self.vec) + clue.rot(theta)
         rotted_center = self.orig + mypiv + clue.rot(theta)
         return rotted_center - self.vec / 2, self.vec
 
-    '''
-    def rotate(self, theta):
-        c = deepcopy(self)
-        ctr = self.center;
-        for k,i in enumerate(c.i):
-            c.i[k] = (i - ctr).rot(theta) + ctr
-        for k,o in enumerate(c.o):
-            c.o[k] = (o - ctr).rot(theta) + ctr
-        for k,mg in enumerate(c.mg):
-            c.mg[k] = (mg - ctr).rot(theta) + ctr
-        return c
-    '''
-    
     def __deepcopy__(self, memo):
         r = deepcopy(super(Circle, self), memo)
         r.__class__ = self.__class__
@@ -1050,15 +1011,6 @@ def comp(n):
     for i in ids:
         node(i)(i)
 
-#    for i in ids:
-#        for j in ids:
-#            if i != j:
-#                Connect([i,j]).draws();
-
-#    for i in ids:
-#        for j in range(i+1, i+n):
-#            Connect([i,j % n]).draws()
-
     for i in ids:
         for j in range(i+1, n):
             Connect([i,j]).draws()
@@ -1084,7 +1036,6 @@ def comp_partial(n):
         c.i = [d(angle(k)) for k in range(m-i,m)]
         c.o = [d(angle(k)) for k in range(m-i)]
 
-        #return c.rotate(360/n * i)
         return Rotate(c, 360/n * i)
     
     for i in ids:
@@ -1100,8 +1051,6 @@ def comp_partial(n):
                 Relate([i,j], lambda b,e: line(b,e,True)).draws()
             else:
                 Relate([i,j], lambda b,e: line(b,e,False)).draws()
-            # Connect([i,j]).draws()
-            # Pattern([i,j], lambda i: (lambda b,e: line(b,e,True)) if i % 2 == 0 else (lambda b,e: line(b,e,False)) ).draws()
                 
     d.draws()
 
@@ -1119,13 +1068,7 @@ def rrot2():
 
     for i in range(0,360,6):
         rr = Rotate(r, i, Vec(0,1/8));
-        #rr.orig = Vec(20,20); rr.draws();
         rr.draws()
-
-    #rr = Rotate(r, 60);
-    #r.orig = Vec(10,10)
-    #rr.orig = Vec(10,10)
-    #r.draws(); rr.draws();
 
 @morphscript
 def rrot3():
@@ -1187,83 +1130,7 @@ def frac(n):
         c = c[Vec(1/2,0)] + Circle(r/10, fill="red")[Vec(1/2,0)]
         ccc = c[d(-120)][d(-60)] + c[d(120)] + c[d(60)]
         C = ccc[Vec(1/2,0)][Vec(1/2,0)] + Circle(r * (1+2*sqrt(3)/3))[Vec(1/2,0)] 
-        #C = Circle(r * (1+2*sqrt(3)/3))[Vec(1/2,0)] + ccc[Vec(1/2,0)]
-        # C = Circle(r * (1+2*sqrt(3)/3))[Vec(1/2,0)][Vec(1/2,0)] + ccc[Vec(1/2,0)] + Circle(r/10, fill="red")[Vec(1/2,0)]
-        #C = Circle(r * (1+2*sqrt(3)/3))[Vec(1/2,0)] + ccc[Vec(1/2,0)]
         return Rotate(C, 90/n if n > 0 else 0) 
-    t = f(n); t.draws(off=Vec(5,5))
+    f(n).draws()
 
-@morphscript
-def ff():
-    def d(theta):
-        return Vec(1/2,1/2) + Vec.d(theta) / 2
-    c = Circle(1); #cc = Rotate(c, 60, Vec(1/2,1/3))
-    c2 = c[d(-120)][d(-60)] + c[d(120)] #+ c[d(60)]
-#    r = Rotate(c2, 30)[Vec(1,1/2)] + Rect(1,4)[Vec(0,1/2)]
-#    r.draws()
-
-    ccc = c2 + c[d(60)]
-    C = ccc
-    #C = ccc[Vec(1/2,0)] + Circle(1+2*sqrt(3)/3)[Vec(1/2,0)]
-    #r = C.vec.x / 2
-    #CCC = C[d(-120)][d(-60)] + C[d(120)] + C[d(60)]
-    #C = CCC[Vec(1/2,0)] + Circle(r * (1+2*sqrt(3)/3))[Vec(1/2,0)]
-    #cc = Rotate(C, 30, Vec(1/3,1/5))
-    r = Rect(1,2)[Vec(0,1/2)] + Circle(1/10, fill="red")[Vec(1/2,1/2)]
-    cc = Rotate(C, 43)[Vec(1,1/2)] + r[Vec(0,1/2)]
-    d = cc[Vec(0,0)] + Circle(1/10, fill="blue")[Vec(1/2,1/2)]
-    d.draws(off=Vec(5,5))
-
-@morphscript
-def fff():
-    def d(theta):
-        return Vec(1/2,1/2) + Vec.d(theta) / 2
-    c = Circle(1/4); #cc = Rotate(c, 60, Vec(1/2,1/3))
-    c2 = c[d(-120)][d(-60)] + c[d(120)] #+ c[d(60)]
-#    r = Rotate(c2, 30)[Vec(1,1/2)] + Rect(1,4)[Vec(0,1/2)]
-#    r.draws()
-
-    ccc = c2 + c[d(60)]
-    C = ccc
-    C = ccc[Vec(1/2,0)] + Circle((1/4) * (1+2*sqrt(3)/3))[Vec(1/2,0)]
-    r = C.vec.x / 2; print(r)
-    CCC = C[d(-120)][d(-60)] + C[d(120)] + C[d(60)]
-    C = CCC[Vec(1/2,0)] + Circle(r * (1+2*sqrt(3)/3))[Vec(1/2,0)]
-    c = Rotate(C, 45)
-    
-    #c.draws(off=Vec(5,5))
-    
-    r = c.vec.x / 2; print(r)
-    #ccc = (c[d(-120)][d(-60)][Vec(0,0)] + Circle(1/10, fill="red")[Vec(1/2,1/2)]) + c[d(120)] + c[d(60)]
-    ccc = c[d(-120)][d(-60)] + c[d(120)] + c[d(60)]
-    #ccc.draws(off=Vec(5,5))
-    C = ccc[Vec(1/2,0)] + Circle(r * (1+2*sqrt(3)/3))[Vec(1/2,0)]
-    #C = ccc[Vec(1/2,0)] + Circle(1/10)[Vec(1/2,1/2)]
-    #C.draws(off=Vec(5,5))
-    c = Rotate(C, 10)
-
-    #C = c[Vec(0,0)] + Circle(1/10)[Vec(1/2,1/2)]
-
-    r = c.vec.x / 2; print(r)
-    ccc = c[d(-120)][d(-60)] + c[d(120)] + c[d(60)]
-    C = ccc
-
-    C.draws(off=Vec(5,5))
-
-
-#sketch()
-#test2()
-#rott(3)
-#comp_easy(4)
-#comp(12)
-#comp_partial(5)
-#rectrot()
-#mgtest()
-#rrot2()
-#tri()
-#cir()
-#rec()
-#rec3()
 frac(5)
-#ff()
-#fff()
